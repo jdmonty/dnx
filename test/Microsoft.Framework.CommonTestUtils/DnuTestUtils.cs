@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.Framework.CommonTestUtils;
 using Microsoft.Framework.Runtime;
-using Microsoft.Framework.Runtime.Infrastructure;
 
 namespace Microsoft.Framework.PackageManager
 {
@@ -35,7 +34,7 @@ namespace Microsoft.Framework.PackageManager
                 runtimeRoot = Directory.EnumerateDirectories(Path.Combine(runtimeHomePath, "runtimes"), Constants.RuntimeNamePrefix + "*").First();
             }
 
-            var isMono = ((IRuntimeEnvironment)CallContextServiceLocator.Locator.ServiceProvider.GetService(typeof(IRuntimeEnvironment))).RuntimeType == "Mono";
+            var isMono = RuntimeEnvironmentHelper.IsMono(TestUtils.CurrentRuntimeEnvironment);
             if (isMono)
             {
                 program = Path.Combine(runtimeRoot, "bin", "dnu");
