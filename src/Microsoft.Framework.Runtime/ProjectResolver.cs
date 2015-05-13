@@ -45,7 +45,7 @@ namespace Microsoft.Framework.Runtime
             var candidates = _projects[name];
             if (candidates.Count() > 1)
             {
-                var allCandidatePaths = string.Join(Environment.NewLine, candidates.Select(x => x.FullPath));
+                var allCandidatePaths = string.Join(Environment.NewLine, candidates.Select(x => x.FullPath).OrderBy(x => x));
                 throw new InvalidOperationException(
                     $"'{name}' is an ambiguous name resolved to following projects:{Environment.NewLine}{allCandidatePaths}");
             }
