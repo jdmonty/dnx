@@ -42,7 +42,7 @@ namespace Microsoft.Framework.Runtime
                 return false;
             }
 
-            var candidates = _projects[name];
+            var candidates = _projects[name].Where(p => File.Exists(Path.Combine(p.FullPath, Project.ProjectFileName)));
             if (candidates.Count() > 1)
             {
                 var allCandidatePaths = string.Join(Environment.NewLine, candidates.Select(x => x.FullPath).OrderBy(x => x));

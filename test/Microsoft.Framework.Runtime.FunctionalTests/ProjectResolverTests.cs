@@ -56,6 +56,40 @@ namespace Microsoft.Framework.Runtime.FunctionalTests
         }
 
         [Fact]
+        public void ProjectResolverChecksProjectFileForDisambiguation()
+        {
+            const string projectName = "ProjectA";
+            var solutionStructure = @"{
+  'global.json': '',
+  'src1': {
+    'ProjectA': {
+      'project.json': '{}'
+    }
+  },
+  'src2': {
+    'ProjectA': {
+      'file.txt': 'Not a project.json'
+    }
+  }
+}";
+
+            using (var solutionPath = new DisposableDir())
+            {
+                DirTree.CreateFromJson(solutionStructure)
+                    .WithFileContents("global.json", @"{
+  ""projects"": [""src1"", ""src2""]
+}")
+                    .WriteTo(solutionPath);
+
+                var projectPath = Path.Combine(solutionPath, "src1", projectName);
+
+                Project project;
+                Assert.True(new ProjectResolver(projectPath).TryResolveProject(projectName, out project));
+                Assert.NotNull(project);
+            }
+        }
+
+        [Fact]
         public void ProjectResolverDoesNotThrowWhenAmbiguousNameIsNotUsed()
         {
             const string ambiguousName = "ProjectA";
