@@ -38,7 +38,7 @@ namespace Microsoft.Framework.Runtime.FunctionalTests
 
                 var src1ProjectPath = Path.Combine(solutionPath, "src1", ambiguousName);
                 var src2ProjectPath = Path.Combine(solutionPath, "src2", ambiguousName);
-                var expectedMessage = $@"'{ambiguousName}' is an ambiguous name resolved to following projects:
+                var expectedMessage = $@"The project name '{ambiguousName}' is ambiguous between the following projects:
 {src1ProjectPath}
 {src2ProjectPath}";
 
@@ -129,6 +129,40 @@ namespace Microsoft.Framework.Runtime.FunctionalTests
                 project = null;
                 Assert.True(new ProjectResolver(unambiguousProjectPath).TryResolveProject(unambiguousName, out project));
                 Assert.NotNull(project);
+            }
+        }
+
+        [Fact]
+        public void ProjectResolverWorksWithMultipleNonProjectFoldersThatHaveSameName()
+        {
+            const string projectName = "ProjectA";
+            var solutionStructure = @"{
+  'global.json': '',
+  'src1': {
+    'ProjectA': {
+      'file.txt': 'Not a project.json'
+    }
+  },
+  'src2': {
+    'ProjectA': {
+      'file.txt': 'Not a project.json'
+    }
+  }
+}";
+
+            using (var solutionPath = new DisposableDir())
+            {
+                DirTree.CreateFromJson(solutionStructure)
+                    .WithFileContents("global.json", @"{
+  ""projects"": [""src1"", ""src2""]
+}")
+                    .WriteTo(solutionPath);
+
+                var projectPath = Path.Combine(solutionPath, "src1", projectName);
+
+                Project project;
+                Assert.False(new ProjectResolver(projectPath).TryResolveProject(projectName, out project));
+                Assert.Null(project);
             }
         }
     }

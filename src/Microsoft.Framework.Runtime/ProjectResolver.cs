@@ -42,12 +42,14 @@ namespace Microsoft.Framework.Runtime
                 return false;
             }
 
-            var candidates = _projects[name].Where(p => File.Exists(Path.Combine(p.FullPath, Project.ProjectFileName)));
+            // ProjectInformation.Project is lazily evaluated only once and
+            // it returns null when ProjectInformation.FullPath doesn't contain project.json
+            var candidates = _projects[name].Where(p => p.Project != null);
             if (candidates.Count() > 1)
             {
                 var allCandidatePaths = string.Join(Environment.NewLine, candidates.Select(x => x.FullPath).OrderBy(x => x));
                 throw new InvalidOperationException(
-                    $"'{name}' is an ambiguous name resolved to following projects:{Environment.NewLine}{allCandidatePaths}");
+                    $"The project name '{name}' is ambiguous between the following projects:{Environment.NewLine}{allCandidatePaths}");
             }
 
             project = candidates.SingleOrDefault()?.Project;
